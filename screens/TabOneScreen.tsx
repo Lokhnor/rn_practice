@@ -1,15 +1,22 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Button } from "react-native";
+import { Text, View } from "../components/Themed";
+import { RootTabScreenProps } from "../types";
+import { useMachine } from "@xstate/react";
+import { promiseMachine } from "../machine/machine";
 
-import EditScreenInfo from '../components/EditScreenInfo';
-import { Text, View } from '../components/Themed';
-import { RootTabScreenProps } from '../types';
-
-export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'>) {
+export default function TabOneScreen({
+  navigation,
+}: RootTabScreenProps<"TabOne">) {
+  const [state, send] = useMachine(promiseMachine);
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
-      <EditScreenInfo path="/screens/TabOneScreen.tsx" />
+      {state.matches("pending") && <Text style={styles.title}>Pending</Text>}
+      {state.matches("resolved") && <Text style={styles.title}>Resolved</Text>}
+      {state.matches("rejected") && <Text style={styles.title}>Rejected</Text>}
+      <View style={styles.separator} />
+      <Button onPress={() => send("RESOLVE")} title="Resolve" />
+      <View style={styles.separator} />
+      <Button onPress={() => send("REJECT")} title="Reject" />
     </View>
   );
 }
@@ -17,16 +24,16 @@ export default function TabOneScreen({ navigation }: RootTabScreenProps<'TabOne'
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   separator: {
     marginVertical: 30,
     height: 1,
-    width: '80%',
+    width: "80%",
   },
 });
